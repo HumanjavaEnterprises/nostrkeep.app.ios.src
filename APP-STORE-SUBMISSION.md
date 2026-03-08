@@ -1,13 +1,13 @@
-# App Store Submission — NostrKey for iOS
+# App Store Submission — NostrKey Authenticator for iOS
 
-This document contains all the information needed to submit NostrKey for iOS to the Apple App Store.
+This document contains all the information needed to submit the NostrKey Authenticator for iOS to the Apple App Store.
 
-> **Note:** This is the standalone iOS app (dual-WKWebView wrapper), NOT the Safari extension companion app at `nostrkey.browser.plugin.src/apple/`.
+> **Two-Product Strategy:** This is the standalone **Authenticator** app (`com.nostrkey.authenticator`), distinct from the Safari Web Extension companion app at `nostrkey.browser.plugin.src/apple/` (`com.nostrkey.extension`). The two apps share a Keychain via App Groups but serve different primary functions and target different App Store categories. See "Relationship to Safari Extension" below.
 
 ## Prerequisites
 
 - [x] Apple Developer account ($99/year)
-- [x] Xcode with valid signing certificate
+- [x] Xcode 16.0+ with valid signing certificate
 - [x] App Store Connect access
 - [x] App icon (1024x1024px, SVG-rendered)
 - [ ] Screenshots for iPhone (6.9" / 6.7")
@@ -20,65 +20,113 @@ This document contains all the information needed to submit NostrKey for iOS to 
 **NostrKey**
 
 ### Subtitle (30 chars max)
-**Nostr Keys & Encrypted Vault**
+**Nostr Identity Authenticator**
 
 ### Promotional Text (170 chars, can update without new build)
 ```
-Manage your Nostr keys, sign events, and store encrypted documents — all on your phone. Lock screen QR sharing, master password, QR scanner, and NIP-44/46 support built in.
+Your Nostr identity, hardware-secured. Scan a QR code to authenticate on any Nostr service. Keys protected by Secure Enclave + Face ID. Add your npub to Apple Wallet.
 ```
 
 ### Keywords (100 chars, comma-separated)
 ```
-nostr,keys,nsec,npub,vault,encryption,signing,nsecbunker,privacy,qr,nip-07,nip-44,crypto,identity
+nostr,authenticator,identity,keys,qr,scanner,secure-enclave,nip-46,signing,npub,nsec,privacy,wallet
 ```
 
 ### Description (4000 chars max)
 ```
-NostrKey for iOS puts your Nostr identity in your pocket. Manage keys, sign events, and store encrypted documents — all without exposing your private key.
+NostrKey is the authenticator for the Nostr protocol. Scan a QR code, and you're signed in. Your private keys live in the Secure Enclave — hardware-isolated, biometric-protected, never extractable.
 
-This app runs the full NostrKey extension natively on iOS, with platform integrations like QR code scanning and native clipboard.
+Think of NostrKey as the 1Password or Authy for Nostr. Websites and apps show you a QR code, you scan it with NostrKey, and you're authenticated — your private key never leaves your device.
+
+HOW IT WORKS
+
+1. Create or import your Nostr identity
+2. Your private key is stored in the Secure Enclave with Face ID protection
+3. When a Nostr app needs you to sign in, it shows a QR code
+4. Scan the QR code with NostrKey — authentication happens instantly
+5. Your key never touches the browser or the app you're signing into
 
 KEY FEATURES
 
-• Key management — create, import, and manage multiple Nostr profiles
-• NIP-44 encryption — modern ChaCha20-Poly1305 encrypted messaging
-• NIP-46 nsecBunker — remote signing, your private key never touches a browser
-• NIP-49 encrypted export — ncryptsec key backup and restore
-• Encrypted document vault — zero-knowledge .md storage on Nostr relays (NIP-78)
-• API key vault — encrypted secret storage with relay sync
-• Master password — keys encrypted at rest with configurable auto-lock (5/15/30/60 min)
-• QR code scanner — scan npub, nsec, or ncryptsec keys with your camera
-• Lock screen QR code — share your npub QR code without unlocking the app
-• Lock screen profile display — see your active profile name and npub at a glance
-• Dark theme — Monokai color scheme designed for key management
-• Relay configuration — connect to your preferred Nostr relays
+• QR Code Scanner — scan to authenticate on any Nostr service, add relays, or import keys
+• Secure Enclave Storage — private keys protected by hardware isolation + Face ID / Touch ID
+• Dashboard — manage multiple Nostr identities, switch profiles, see relay status at a glance
+• NIP-46 Remote Signing — apps request signatures over relays, your key stays on your device
+• One-Tap Relay Management — add relays by scanning a QR code or tapping a deep link
+• Identity Card — your npub as a shareable QR code with copy and share actions
+• Apple Wallet Integration — add your Nostr identity as a Wallet pass for meetups and events
+• Deep Link Support — nostrkey:// URLs for add-relay, connect, import-keys, and wallet-pass
+• Dark Theme — Monokai color scheme matching the NostrKey browser extension
+
+WORKS WITH THE NOSTRKEY SAFARI EXTENSION
+
+NostrKey Authenticator and the NostrKey Safari Web Extension share a secure Keychain via App Groups. When both are installed:
+
+• The Safari extension detects your Secure Enclave keys automatically
+• Browser signing is upgraded from software keys to hardware-secured keys
+• No manual configuration needed — they find each other through the shared Keychain
+• Use the extension for quick browser interactions, the app for high-security signing
+
+You don't need both — each works independently — but together they form a two-tier security model: convenience in the browser, hardware security on your device.
 
 SECURITY
 
-All private key material stays on your device. Documents are encrypted client-side before publishing to relays — relay operators see only ciphertext. Master password protects keys at rest with configurable auto-lock.
+All private key material stays on your device. Keys are stored in the Secure Enclave with biometric access control — every signing operation requires Face ID or Touch ID. No data is collected, no analytics, no tracking. NostrKey is fully open source under the MIT license.
 
 SUPPORTED NIPS
 
-NIP-01 (Basic protocol), NIP-04 (Encrypted DMs v1, legacy), NIP-07 (Key management), NIP-19 (Bech32 encoding), NIP-44 (Encrypted messaging v2), NIP-46 (Nostr Connect / nsecBunker), NIP-49 (Encrypted key export), NIP-78 (App-specific data / vault)
+NIP-01 (Basic protocol), NIP-07 (Key management), NIP-19 (Bech32 encoding), NIP-44 (Encrypted messaging v2), NIP-46 (Nostr Connect / remote signing)
 
 OPEN SOURCE
 
-NostrKey is fully open source under the MIT license. Audit the code yourself at github.com/HumanjavaEnterprises.
+Audit the code yourself at github.com/HumanjavaEnterprises.
 
-Your keys. Your control. No data collection. No tracking.
+Your identity. Your keys. Your rules.
+```
+
+### What's New (Version 2.0)
+```
+Completely rebuilt from the ground up as a native SwiftUI authenticator.
+
+• New: QR code scanner for NIP-46 remote signing
+• New: Secure Enclave key storage with Face ID
+• New: Dashboard with profile management
+• New: One-tap relay management via QR codes and deep links
+• New: Identity card with shareable npub QR code
+• New: Camera permission handling with Settings redirect
+• New: Monokai dark theme matching the browser extension
+• New: Shared Keychain bridge with Safari extension
 ```
 
 ### Category
 **Utilities**
 
 ### Secondary Category
-**Social Networking**
+**Productivity**
 
 ### Content Rights
 **Does not contain third-party content that requires rights.**
 
 ### Age Rating
 **4+** (no objectionable content)
+
+## Relationship to Safari Extension
+
+NostrKey exists as two complementary products on the App Store:
+
+| | NostrKey Authenticator | NostrKey Web Extension |
+|---|---|---|
+| **Bundle ID** | `com.nostrkey.authenticator` | `com.nostrkey.extension` |
+| **Category** | Utilities | Safari Extensions |
+| **Primary UI** | Camera / QR scanner + dashboard | Browser toolbar popup |
+| **Key Storage** | Secure Enclave (hardware) | Keychain (software) |
+| **Authentication** | Face ID / Touch ID per operation | Master password + auto-lock |
+| **Primary Function** | QR-based identity authentication | NIP-07 browser signing injection |
+| **App Groups** | `group.com.nostrkey` (shared) | `group.com.nostrkey` (shared) |
+
+**Why two apps?** The Safari extension injects `window.nostr` into web pages for seamless browser-based signing. The authenticator app provides hardware-secured key storage and QR-based authentication that works with any Nostr client, not just browsers. Different app categories, different primary interfaces, different use cases — like how 1Password has both a Safari extension and a standalone app.
+
+**Bridge behavior:** When both apps are installed, the Safari extension automatically detects Secure Enclave keys stored by the authenticator via the shared App Group Keychain (`H48PW6TC25.group.com.nostrkey`). It upgrades its signing operations from software keys to hardware-secured keys transparently.
 
 ## Privacy Details (App Store Connect)
 
@@ -105,14 +153,14 @@ Select: **Data Not Collected**
 
 #### iPhone 6.9" (required — iPhone 17 Pro Max)
 - Resolution: 1320x2868
-- Located: `screenshots/`
+- Located: `QA-AUTOMATION/screenshots/appstore/phone-6.9/`
 - Screens to capture:
-  1. Lock screen — active profile with npub and "Show QR Code" button
-  2. Lock screen QR — bottom sheet with npub QR code
-  3. Home — profile list with QR code
-  4. Vault — encrypted document list
-  5. Settings — security & relay config with toggle switches
-  6. QR Scanner — camera view (device only)
+  1. Home dashboard — active profile card with QR, profile list, relay status
+  2. QR Scanner — camera viewfinder with scan overlay
+  3. Scan result — relay URL detected, "Add Relay" confirmation sheet
+  4. Identity card — full npub QR code with copy/share/wallet actions
+  5. Relay list — configured relays with status indicators
+  6. Settings — security status, NIP-46 sessions, profile management
 
 #### iPhone 6.7" (optional — covers iPhone 15 Pro Max, 14 Pro Max)
 - Resolution: 1290x2796
@@ -121,36 +169,43 @@ Select: **Data Not Collected**
 ## App Review Information
 
 ### Demo Account
-Not applicable — NostrKey generates keys locally. No account or login needed.
+Not applicable — NostrKey generates keys locally. No account, server, or subscription needed.
 
 ### Review Notes
 ```
-NostrKey for iOS is a standalone Nostr key management app. It runs the NostrKey browser extension UI natively in WKWebViews with a native Swift bridge for platform integration.
+NostrKey Authenticator is a native SwiftUI app that provides QR-based Nostr identity authentication with Secure Enclave key storage. It is NOT a browser extension wrapper — it is a standalone authenticator built with AVFoundation (camera), Security framework (Keychain/Secure Enclave), LocalAuthentication (Face ID), and CoreImage (QR generation).
+
+This app is distinct from our NostrKey Safari Web Extension (com.nostrkey.extension). The web extension injects window.nostr into Safari for browser-based signing. This authenticator app provides hardware-secured key storage and QR-based authentication — a different app category, different primary interface, and different use case. They share a Keychain via App Groups so users who install both get upgraded security automatically.
 
 Key functionality:
-1. Generate or import Nostr private keys (nsec/hex format)
-2. View public key (npub) with QR code for sharing
-3. Sign Nostr events (NIP-01)
-4. Encrypt/decrypt messages (NIP-44 ChaCha20-Poly1305)
-5. Connect to remote signers (NIP-46 nsecBunker)
-6. Store encrypted documents in a zero-knowledge vault on relays
-7. Scan QR codes to import keys (nsec, npub, ncryptsec)
-8. Export keys in encrypted format (NIP-49 ncryptsec)
+1. Generate or import Nostr private keys (nsec bech32 format)
+2. Store keys in the Keychain with Secure Enclave protection + Face ID
+3. Scan QR codes to authenticate on Nostr services (NIP-46 remote signing)
+4. Scan QR codes to add relays or import keys
+5. View public key (npub) as a QR code for sharing
+6. Manage multiple Nostr identities with profile switching
+7. Configure relay connections with NIP-11 metadata fetching
+8. Deep link support for nostrkey:// and nostrconnect:// URI schemes
 
 To test:
-1. Launch the app — a default profile is created automatically
-2. The lock screen shows your active profile name, truncated npub, and a "Show QR Code" button
-3. Tap "Show QR Code" before unlocking — a bottom sheet prompts you to unlock first
-4. The "Secure Your Vault" prompt lets you set up a master password
-5. After unlocking, tap "Show QR Code" — the bottom sheet displays your npub QR code
-6. Tap the profile to view npub, QR code, and edit options
-7. Use the Vault tab to create encrypted documents
-8. Use the Relays tab to configure relay connections
-9. Use Settings for security options (master password, auto-lock timeout, toggle switches)
+1. Launch the app — tap "Create New Identity" on the onboarding screen
+2. The Home tab shows your active profile with npub QR code
+3. Tap profiles in the list to switch active identity
+4. Go to the Scanner tab — grant camera permission when prompted
+5. Visit nostrkey.com/test-qr-codes on another device to get test QR codes
+6. Scan a relay URL QR (wss://relay.damus.io) — the app offers to add it
+7. Scan an npub QR — the app shows the profile view
+8. View the Identity tab for your full npub QR with copy/share actions
+9. The Relays tab shows configured relays with status
+10. Settings shows security status and profile management
 
-No external account, server, or subscription is needed. All data is stored locally in the app sandbox. Network connections go only to user-configured Nostr relays.
+Camera usage: Required for QR code scanning (AVFoundation). If permission is denied, the Scanner tab shows an "Open Settings" button to re-enable it.
 
-This app does NOT inject window.nostr — it is not a browser extension. It is a standalone key manager and vault.
+Face ID usage: Protects private key access. If biometrics aren't available (e.g., Simulator), falls back to device-unlock-only Keychain protection.
+
+No external account, server, or subscription is needed. Network connections go only to user-configured Nostr relays for NIP-46 sessions and NIP-11 metadata fetching. All key material is stored locally in the device Keychain.
+
+Precedent: This two-product model (browser extension + standalone authenticator) follows the pattern established by 1Password, Authy, and Microsoft Authenticator, all of which have both Safari extensions and standalone iOS apps on the App Store.
 ```
 
 ### Contact Information
@@ -162,13 +217,16 @@ This app does NOT inject window.nostr — it is not a browser extension. It is a
 ## Build & Archive
 
 ### Version
-- `MARKETING_VERSION`: 1.0.4
-- `CURRENT_PROJECT_VERSION`: 5
-- Bundle ID: `com.nostrkey.app`
+- `MARKETING_VERSION`: 2.0.0
+- `CURRENT_PROJECT_VERSION`: 1
+- Bundle ID: `com.nostrkey.authenticator`
+- Minimum iOS: 17.0
+- Swift: 5.9
+- Xcode: 16.0+
 
 ### Archive from Xcode
 ```bash
-# 1. Generate project
+# 1. Generate project (if using XcodeGen)
 cd nostrkey.app.ios.src
 xcodegen generate
 
@@ -178,10 +236,14 @@ open NostrKey.xcodeproj
 # 3. Select signing team in project settings
 #    Xcode → NostrKey target → Signing & Capabilities → Team
 
-# 4. Archive
+# 4. Verify entitlements
+#    - App Groups: group.com.nostrkey
+#    - Keychain Sharing: $(AppIdentifierPrefix)group.com.nostrkey
+
+# 5. Archive
 #    Product → Archive (requires "Any iOS Device" destination)
 
-# 5. Distribute
+# 6. Distribute
 #    Window → Organizer → select archive → Distribute App → App Store Connect
 ```
 
@@ -205,16 +267,17 @@ xcodebuild -exportArchive \
 ## Submission Checklist
 
 - [ ] Apple Developer account active
-- [ ] App Store Connect entry created for "NostrKey" (com.nostrkey.app)
+- [ ] App Store Connect entry created for "NostrKey" (com.nostrkey.authenticator)
 - [ ] Fill out app description, subtitle, keywords
 - [ ] Upload promotional text
-- [ ] Set categories (Utilities + Social Networking)
+- [ ] Set categories (Utilities + Productivity)
 - [ ] Upload screenshots (iPhone 6.9" minimum)
 - [ ] Set privacy declarations (Data Not Collected)
 - [ ] Add privacy policy URL
 - [ ] Add support URL
-- [ ] Add review notes
+- [ ] Add review notes (include two-product explanation)
 - [ ] Select signing team in Xcode
+- [ ] Verify App Groups + Keychain entitlements
 - [ ] Archive and upload build from Xcode
 - [ ] Select build in App Store Connect
 - [ ] Submit for review
@@ -223,25 +286,27 @@ xcodebuild -exportArchive \
 
 - Initial review: typically 1-3 days
 - This app may receive questions about:
-  - Cryptographic functionality — explain NIP-44 (ChaCha20-Poly1305)
-  - Key storage — explain local-only storage in app sandbox
-  - Relay connections — explain NSAllowsArbitraryLoadsInWebContent (WebSocket to user-configured relays)
+  - **Relationship to Safari extension** — explain two-product model with different categories, interfaces, and use cases (see review notes)
+  - **Secure Enclave usage** — keys stored in Keychain with SecAccessControl biometric policy, not native SE key generation (secp256k1 is not SE-native)
+  - **Camera usage** — AVFoundation for QR code scanning, not photo/video capture
+  - **Relay connections** — WebSocket connections to user-configured Nostr relays only
 
 ## Post-Submission
 
 ### If Approved
 - Update README.md with App Store link and badge
-- Update nostrkey.com with iOS download link
+- Update nostrkey.com with iOS authenticator download link
+- Add deep link from Safari extension to App Store listing
 - Announce on Nostr
 
 ### If Rejected
 - Review feedback in Resolution Center
 - Common issues:
-  - WebView-based app concerns → explain native bridge integration (QR scanner, clipboard, storage)
-  - NSAllowsArbitraryLoadsInWebContent → explain Nostr relay WebSocket connections
-  - Minimal functionality → demonstrate vault, key management, QR scanning, encryption
+  - **4.3(a) Spam (duplicate app)** — respond with two-product comparison table showing different categories, different primary interfaces, different bundle IDs, different use cases. Cite 1Password/Authy precedent.
+  - **Camera permission** — explain AVFoundation QR scanning for NIP-46 authentication
+  - **Minimal functionality** — demonstrate dashboard, QR scanner, identity card, relay management, profile switching, deep links
 
 ---
 
-*Last updated: February 22, 2026*
-*Published by Humanjava Enterprises Inc*
+*Last updated: March 5, 2026*
+*Published by Humanjava Enterprises Inc.*

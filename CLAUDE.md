@@ -1,44 +1,74 @@
 # CLAUDE.md — nostrkey.app.ios.src
 
 ## What This Is
-NostrKey iOS app — native wrapper that runs the full NostrKey browser extension UI on iOS with native platform integrations (QR scanner, clipboard, lock screen npub display).
+NostrKey iOS app — a native SwiftUI Nostr identity authenticator. QR scanner as primary interface, Secure Enclave key storage, NIP-46 remote signing, Apple Wallet integration, and deep link relay management.
+
+## Architecture (v2 — March 2026 Rebuild)
+Complete rewrite from WebView-wrapper to native SwiftUI. No more bundled browser extension. The app is a standalone authenticator that holds keys and signs on behalf of any Nostr client.
+
+### Source: `NostrKey-v2/`
+```
+NostrKey-v2/
+├── App/           # SwiftUI app entry, AppState, ContentView, DeepLinkHandler
+├── Scanner/       # AVFoundation QR camera view
+├── Identity/      # KeyManager (Secure Enclave), NostrProfile, ProfileManager
+├── Relay/         # RelayManager, RelayInfo, NIP-11 metadata
+├── NIP46/         # NIP-46 remote signing session management
+├── Crypto/        # Bech32, NostrCrypto (nsec/npub encoding), event hashing
+├── UI/            # IdentityCardView, RelayListView, SettingsView
+├── Info.plist     # App config (camera + Face ID permissions, deep link schemes)
+└── NostrKey.entitlements  # App Groups + Keychain sharing
+```
+
+### Legacy Source: `NostrKey/`
+The original WebView-wrapper app (v1.x) is preserved in `NostrKey/` for reference. The v2 project.yml points to `NostrKey-v2/` sources but still uses `NostrKey/Assets.xcassets` for icons.
 
 ## Ecosystem Position
-Mobile surface for NostrKey — the key management layer. Same role as the browser extension but on iOS. Uses dual-WKWebView architecture with IOSBridge.swift bridging JS to native APIs.
+The authenticator for Nostr. Holds keys in Secure Enclave, signs via NIP-46 for any client. Shares keys with the Safari extension via App Group Keychain (`group.com.nostrkey`).
 
 ## Current Version
-v1.1.1 — Bundled extension v1.5.5 — App Store submission in progress
+v2.0.0 (Build 1) — Native SwiftUI rebuild
 
 ## Tech Stack
-- Swift 5.9, Xcode 15.0+
-- Dual-WKWebView (background + UI)
-- IOSBridge.swift (`WKScriptMessageHandler`)
-- ios-polyfill.js maps `chrome.storage`/`chrome.runtime` to bridge calls
-- UserDefaults for storage
-- AVFoundation for QR scanning
-- xcodegen for project generation
+- Swift 5.9, SwiftUI, Xcode 16.0+, iOS 17.0+
+- AVFoundation (QR camera)
+- Security framework + CryptoKit (Keychain with Secure Enclave protection)
+- LocalAuthentication (Face ID / Touch ID)
+- CoreImage (QR code generation)
+- URLSessionWebSocketTask (NIP-46 relay communication)
+- XcodeGen for project generation
 
 ## Build
 ```bash
 xcodegen generate
 open NostrKey.xcodeproj
-# Build & Run in Xcode
+# Build & Run in Xcode (requires physical device for camera + Secure Enclave)
 ```
 
-## Key Differences from Browser Extension
-- Storage: UserDefaults (not `chrome.storage`)
-- QR scanning: AVFoundation (native)
-- No `window.nostr` injection
-- No cross-device sync yet
-- Lock screen QR code + npub display (iOS-only features)
+## Key Architecture Decisions
+- **SwiftUI-only** — no UIKit except for AVCaptureSession (camera requires UIKit)
+- **Secure Enclave via Keychain** — secp256k1 keys stored with biometric access policy
+- **App Group sharing** — `group.com.nostrkey` shared Keychain + UserDefaults
+- **NIP-46 over WebSocket** — remote signing without key exposure
+- **Deep links** — `nostrkey://add-relay`, `nostrkey://connect`, `nostrconnect://`
+- **No web views** — pure native UI, no embedded browser extension
 
-## Planned
-- App Store listing
-- App Groups (share profiles between iOS app ↔ Safari extension)
-- Biometric unlock (Face ID / Touch ID)
-- Deep links (`nostr:` URIs)
+## TODO: Before Shipping
+- [ ] Integrate swift-secp256k1 package for real key derivation + Schnorr signing
+- [ ] Complete NIP-46 message parsing and encrypted response flow
+- [ ] Apple Wallet pass generation (PassKit + server-side signing)
+- [ ] Pass update push notification service
+- [ ] NIP-49 (ncryptsec) encrypted relay backup
+- [ ] App Store screenshots for authenticator flow
+
+## Deep Link Schemes
+- `nostrkey://add-relay?url=wss://...&name=...&paid=true`
+- `nostrkey://connect?pubkey=...&relay=wss://...`
+- `nostrkey://import-keys?nsec=nsec1...`
+- `nostrkey://wallet-pass?npub=npub1...`
+- `nostrconnect://pubkey?relay=wss://...&secret=...`
 
 ## Related Repos
-- `nostrkey.browser.plugin.src` — core extension code (bundled here as web assets)
+- `nostrkey.browser.plugin.src` — Safari/Chrome extension (NIP-07)
 - `nostrkey.app.android.src` — Android equivalent
-- `nostrkey.bizdocs.src` — business strategy
+- `nostrkey.bizdocs.src` — business strategy (see NostrKey-App-Architecture.md)

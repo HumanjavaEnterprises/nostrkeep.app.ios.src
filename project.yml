@@ -2,8 +2,8 @@ name: NostrKey
 options:
   bundleIdPrefix: com.nostrkey
   deploymentTarget:
-    iOS: "16.0"
-  xcodeVersion: "15.0"
+    iOS: "17.0"
+  xcodeVersion: "16.0"
   generateEmptyDirectories: true
 
 targets:
@@ -11,27 +11,27 @@ targets:
     type: application
     platform: iOS
     sources:
-      - path: NostrKey/App
-      - path: NostrKey/Controllers
-      - path: NostrKey/Bridge
-      - path: NostrKey/Storage
+      - path: NostrKey-v2/App
+      - path: NostrKey-v2/Scanner
+      - path: NostrKey-v2/Identity
+      - path: NostrKey-v2/Relay
+      - path: NostrKey-v2/NIP46
+      - path: NostrKey-v2/Crypto
+      - path: NostrKey-v2/UI
       - path: NostrKey/Assets.xcassets
-      - path: NostrKey/Web
-        type: folder
-        buildPhase: resources
-      - path: NostrKey/Info.plist
+      - path: NostrKey-v2/Info.plist
         buildPhase: none
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.nostrkey.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.nostrkey.authenticator
         PRODUCT_NAME: NostrKey
-        MARKETING_VERSION: "1.1.11"
-        CURRENT_PROJECT_VERSION: 8
+        MARKETING_VERSION: "2.0.0"
+        CURRENT_PROJECT_VERSION: 1
         TARGETED_DEVICE_FAMILY: "1,2"
-        INFOPLIST_FILE: "NostrKey/Info.plist"
+        INFOPLIST_FILE: "NostrKey-v2/Info.plist"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_VERSION: "5.9"
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_ENTITLEMENTS: NostrKey/NostrKey.entitlements
+        CODE_SIGN_ENTITLEMENTS: NostrKey-v2/NostrKey.entitlements
         ALWAYS_SEARCH_USER_PATHS: NO
